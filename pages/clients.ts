@@ -90,14 +90,30 @@ export class ClientsPage {
             exact: true,
         });
         await expect(clientLink).toBeVisible();
-        await clientLink.click();
-        await this.page.getByText('Details', { exact: true }).click();
+        const opensInNewTab = (await clientLink.getAttribute('target')) === '_blank';
+        let clientPage = this.page;
 
-        await expect(this.page.getByText(details.tradeName, { exact: true })).toBeVisible();
-        await expect(this.page.getByText(details.email, { exact: true })).toBeVisible();
-        await expect(this.page.getByText(details.gstin, { exact: true })).toBeVisible();
+        if (opensInNewTab) {
+            [clientPage] = await Promise.all([
+                this.page.waitForEvent('popup'),
+                clientLink.click(),
+            ]);
+        } else {
+            await Promise.all([
+                this.page.waitForURL((url) => url.pathname.endsWith('/history')),
+                clientLink.click(),
+            ]);
+        }
+
+        const detailsTab = clientPage.getByText('Details', { exact: true });
+        await expect(detailsTab).toBeVisible();
+        await detailsTab.click();
+
+        await expect(clientPage.getByText(details.tradeName, { exact: true })).toBeVisible();
+        await expect(clientPage.getByText(details.email, { exact: true })).toBeVisible();
+        await expect(clientPage.getByText(details.gstin, { exact: true })).toBeVisible();
         await expect(
-            this.page.getByText(
+            clientPage.getByText(
                 new RegExp(
                     `\\+?91\\s*${details.mobileNumber.slice(0, 5)}\\s*${details.mobileNumber.slice(5)}$`,
                 ),
