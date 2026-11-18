@@ -3,6 +3,7 @@ import { LoginPage } from '../pages/login';
 
 type Fixtures = {
     authenticatedPage: Page;
+    closeContext: void;
 };
 
 function getCredentials() {
@@ -22,7 +23,19 @@ function getCredentials() {
 }
 
 export const test = base.extend<Fixtures>({
-    authenticatedPage: async ({ page }, use) => {
+    closeContext: [
+        async ({ context }, use) => {
+            try {
+                await use();
+            } finally {
+                await context.close();
+            }
+        },
+        { auto: true },
+    ],
+    authenticatedPage: async ({ page }, use, testInfo) => {
+        testInfo.setTimeout(60_000);
+
         const { username, password } = getCredentials();
         const loginPage = new LoginPage(page);
 

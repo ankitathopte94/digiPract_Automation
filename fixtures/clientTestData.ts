@@ -206,7 +206,23 @@ export async function appendAndReadClientTestData(): Promise<ClientDetails> {
         writeFile(workbook, tempPath);
         await rename(tempPath, workbookPath);
 
-        return toClientDetails(newRow);
+        const savedWorkbook = readFile(workbookPath);
+        const savedClientsWorksheet = savedWorkbook.Sheets[clientsSheetName];
+
+        if (!savedClientsWorksheet) {
+            throw new Error(`No "${clientsSheetName}" worksheet found in ${workbookPath}`);
+        }
+
+        const savedClientRows = utils.sheet_to_json<ClientTestDataRow>(savedClientsWorksheet, {
+            defval: '',
+        });
+        const savedClient = savedClientRows[savedClientRows.length - 1];
+
+        if (!savedClient) {
+            throw new Error(`No client data found in the "${clientsSheetName}" worksheet`);
+        }
+
+        return toClientDetails(savedClient);
     } finally {
         await lockHandle.close();
         await unlink(lockPath);

@@ -15,12 +15,19 @@ export class LoginPage {
     }
 
     async navigateToLoginPage() {
-        await this.page.goto('https://dev-app.digipract.com/login');
+        await this.page.goto('https://dev-app.digipract.com/login', {
+            waitUntil: 'domcontentloaded',
+            timeout: 60_000,
+        });
     }
 
     async Login(username: string, password: string) {
         await this.username.fill(username);
         await this.password.fill(password);
         await this.loginButton.click();
+        await this.page.getByRole('link', { name: 'Dashboard', exact: true }).waitFor({
+            state: 'visible',
+            timeout: 60_000,
+        });
     }
 }

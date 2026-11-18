@@ -51,7 +51,7 @@ export class ClientsPage {
         this.taxAndPiiSection = page.getByRole('button', { name: 'TAX & PII' });
         this.confirmedConsentcheckbox = page.locator('#consent_confirmed');
         this.createdClientButton = page.getByTestId('client-form-save');
-    
+
     }
 
     async clickedClientSec(): Promise<void> {
@@ -76,11 +76,11 @@ export class ClientsPage {
         await this.aadhaar.fill(details.aadhaar);
     }
 
-    async checkedConsentConfirmed(): Promise<void>{
+    async checkedConsentConfirmed(): Promise<void> {
         await this.confirmedConsentcheckbox.click();
     }
 
-    async createClientButton(): Promise<void>{
+    async createClientButton(): Promise<void> {
         await this.createdClientButton.click();
     }
 
@@ -89,6 +89,7 @@ export class ClientsPage {
             name: details.fullName,
             exact: true,
         });
+        await clientLink.scrollIntoViewIfNeeded();
         await expect(clientLink).toBeVisible();
         const opensInNewTab = (await clientLink.getAttribute('target')) === '_blank';
         let clientPage = this.page;
